@@ -1,5 +1,0 @@
-# This file is intentionally not the project-wide dependency list.
-# The primary empirical workflow is implemented in Stata 18 and does not
-# require Python packages. Optional dependencies for the retained legacy
-# Python workflow and CSV plotting helper are listed in:
-# requirements-python-legacy.txt
