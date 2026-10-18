@@ -1,62 +1,55 @@
 # Jegadeesh & Titman (1993): Momentum Replication
 
-**Student project:** modern-sample replication and size-heterogeneity extension  
+**Student project:** modern-sample momentum replication and size-heterogeneity extension  
 **Paper:** Narasimhan Jegadeesh and Sheridan Titman (1993), “Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency,” *Journal of Finance*, 48(1), 65–91.
 
-## Research question
+## Primary methodology
 
-Do portfolios formed from past winners outperform portfolios formed from past losers, after controlling for market exposure? Does the estimated momentum alpha vary with firm size?
+The **primary Table III route is the daily-data Scholes–Williams beta approach**, implemented in \`code/stata/\`. The monthly rolling-beta version is an exploratory prototype and is not called by the Stata master script because it did not reproduce the intended Table III specification.
 
-## Scope and sample
+The daily-beta workflow constructs a daily value-weighted market-return proxy from the supplied CRSP ordinary-stock sample, estimates annual Scholes–Williams betas using lagged, contemporaneous, and leading market returns, and assigns each formation month the beta estimated in the prior calendar year. It then constructs six-month momentum portfolios and exports Table III-style raw-return and CAPM-alpha results.
 
-This project applies the market-model approach to monthly portfolio returns over **December 2001–December 2025**, consistent with the course's default modern sample period. It is a modern-sample application of the paper's methodology, not an exact numerical reproduction of the original paper's historical sample.
+**Important limitation:** the market proxy is built from the supplied stock sample and is not guaranteed to be identical to the original CRSP value-weighted index. This is a modern-sample methodological replication, not an exact numerical reproduction of the paper's historical sample.
 
-The core output is a Table III, Panel B-style set of market-model alphas for portfolios P1–P10 and the winner-minus-loser (WML) spread, for the full sample and three size groups. Newey–West/HAC standard errors use five lags.
+## Stata workflow
 
-The independent extension tests whether the WML market-model alpha differs across small-, medium-, and large-size groups. Pairwise tests estimate the intercept in the time-series regression of the difference between two size-group WML returns on the market excess return, using the same HAC lag length.
+From the repository root in Stata 18:
 
-## Repository layout
+\`\`\`stata
+do "code/stata/00_master.do"
+\`\`\`
 
-- `data/raw/`: local raw inputs or instructions for obtaining licensed course data. **Do not commit restricted CRSP/course data.**
-- `data/processed/`: local analysis-ready input files. Do not publish licensed or restricted data; see the folder README.
-- `code/run_all.py`: single Python entry point for the reported regressions, extension tests, CSV tables, and figures.
-- `outputs/tables/`: generated result tables.
-- `outputs/figures/`: generated figures.
-- `skills/SKILL.md`: reusable workflow and validation checklist.
-- `AI_USE_DISCLOSURE.md`: AI-use and verification disclosure.
-- `report.pdf`: preliminary report draft is included; it must be updated after running the workflow against the final approved inputs and reviewing the generated extension tests. The more editable source draft is `report_draft.md`.
+Run order:
+1. \`code/stata/01_prepare_monthly_factors.do\`
+2. \`code/stata/02_estimate_sw_beta.do\`
+3. \`code/stata/03_table3_daily_beta.do\`
 
-## Required input files
+See [\`code/stata/README.md\`](code/stata/README.md) for inputs, assumptions, and validation checks.
 
-Place these files in `data/processed/` on your own computer before running the script:
+## Required local inputs for the Stata workflow
 
-1. `JT_TableII_returns_with_market.dta` — monthly full-sample portfolio returns P1–P10, WML, `mkt_return`, and `holding_month`.
-2. `JT_TableIII_size_panelA_monthly.dta` — monthly size-group portfolio returns, including `sizegrp` (1=small, 2=medium, 3=large), P1–P10, WML, and `holding_month`.
-3. `FF_monthly_factors.dta` — monthly `rf_decimal` and `holding_month`. The script takes the market return from the full-sample portfolio file and merges the risk-free rate by month.
+- \`data/processed/crsp_monthly_clean_base.dta\`
+- \`data/processed/crsp_daily_common_base_2000_2025.dta\`
+- \`data/raw/F-F_Research_Data_Factors.CSV\`
 
-These are input requirements, not files currently included in the public repository. Follow the course download instructions and the included data dictionaries; keep the course-provided folder names and source filenames unchanged where required. Do not upload raw or processed data if the course licence prohibits redistribution.
+Place licensed inputs locally using these paths or adjust the scripts consistently. **Do not commit restricted CRSP/course data** to this public repository.
 
-## Reproduce the outputs
+## Existing Python workflow
 
-Use Python 3.10 or later. From the repository root:
+\`code/run_all.py\` and the associated report files are retained as a separate earlier monthly-portfolio analysis. They are **not** the primary daily Scholes–Williams Table III workflow. Do not mix its results with the Stata daily-beta results unless the sample, portfolio definitions, and factor construction have been reconciled and documented.
 
-```bash
-python -m pip install -r requirements.txt
-python code/run_all.py
-```
+## Outputs
 
-The script stops with an actionable error if an input file is missing. It does not silently substitute data or hard-code the results. On a successful run, it writes the core alpha table, the size-heterogeneity tests, summary statistics, and PNG figures to `outputs/`.
+The Stata workflow writes Table III-style output tables under \`outputs/tables/\` and a log under \`outputs/logs/\`. Intermediate datasets are written under \`data/processed/intermediate/\`. These generated outputs are not included in the repository by default, and licensed data should remain local.
 
-## Validation and interpretation
+## Validation status
 
-- Confirm the sample covers December 2001–December 2025 where the input data permit.
-- Confirm portfolio and factor returns are stored as decimals, not percentage points.
-- Check that the market return and risk-free rate are merged one-to-one by month.
-- Interpret WML as winner return minus loser return; do not subtract the risk-free rate from WML a second time.
-- Report that HAC standard errors use five lags.
-- Compare the sign and qualitative pattern with Jegadeesh and Titman (1993), while explaining the different sample period and data construction.
-- Do not claim that size-group alphas differ statistically unless the extension's formal pairwise tests support that conclusion.
+The scripts have been organized and committed, but **have not been executed against the user's local licensed data in this environment**. Before treating results as final, run them in Stata 18 and check:
+- factor-file headers and factor units;
+- uniqueness of PERMNO-month and date keys;
+- beta merge coverage and the prior-year timing convention;
+- market-proxy construction and daily observation counts;
+- portfolio return units, sample dates, missing months, and observation counts;
+- differences from the assigned paper tables and the reasons for those differences.
 
-## Current status
-
-The repository contains the reproducibility code and documentation scaffold. The licensed input datasets are intentionally not committed. The final PDF report and generated outputs must be refreshed after the required inputs are placed locally and the workflow is run and checked.
+Do not describe outputs as reproduced or validated until this local run completes successfully and its results have been reviewed.
