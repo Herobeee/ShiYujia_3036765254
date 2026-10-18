@@ -61,6 +61,20 @@ foreach J of local jlist {
     }
     replace formret`J' = . if nlag`J' != `J'
 
+    * Project-specific robustness treatment: winsorize J=6 formation returns
+    * cross-sectionally within each formation month at the 1st/99th percentiles.
+    * This is an added implementation choice, not a step attributed to JT (1993).
+    if `J' == 6 {
+        levelsof month if !missing(formret`J'), local(wmonths)
+        foreach mm of local wmonths {
+            quietly _pctile formret`J' if month == `mm' & !missing(formret`J'), p(1 99)
+            local p1 = r(r1)
+            local p99 = r(r2)
+            replace formret`J' = `p1' if month == `mm' & formret`J' < `p1' & !missing(formret`J')
+            replace formret`J' = `p99' if month == `mm' & formret`J' > `p99' & !missing(formret`J')
+        }
+    }
+
     gen byte rank`J' = .
     levelsof month if !missing(formret`J'), local(forms)
     foreach mm of local forms {
