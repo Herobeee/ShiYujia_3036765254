@@ -34,7 +34,7 @@ The scripts assume stock returns are decimals and factor values are percentage p
 
 ## Interpretation and limitations
 
-- Table I includes 16 J/K combinations and P1–P10 plus WML; portfolios are equal-weighted and formation cohorts overlap.
+- Table I includes 16 J/K combinations and P1–P10 plus WML; portfolios are equal-weighted and formation cohorts overlap. As a project-specific robustness choice, the six-month formation return is winsorized cross-sectionally within month at the 1st/99th percentiles; this is not attributed to the original JT procedure.
 - Table II market-model estimates use monthly Fama–French Mkt-RF as the market-excess-return proxy, not the original CRSP value-weighted index.
 - Table III daily market returns are a lagged-capitalization-weighted proxy from the supplied ordinary-stock sample.
 - `SPY_GLD_monthly_prices.csv` is not a stock-level monthly CRSP return panel and cannot create momentum deciles by itself.
