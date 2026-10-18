@@ -1,8 +1,0 @@
-# Optional dependencies for the retained legacy Python monthly-portfolio workflow
-# and for skills/scripts/plot_table3.py (which reads Stata-exported CSV files).
-# The primary estimation workflow uses Stata 18 and does not install Python packages.
-numpy>=1.24
-pandas>=2.0
-matplotlib>=3.7
-statsmodels>=0.14
-pyreadstat>=1.2
