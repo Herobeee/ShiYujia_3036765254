@@ -41,7 +41,7 @@ The exact input fields and output contract are documented in [skills/references/
 After a successful Stata run, figures can be generated from the repository root:
 
 ```bash
-python -m pip install -r requirements-python-legacy.txt
+python -m pip install -r skills/requirements.txt
 python skills/scripts/plot_table3.py
 ```
 
