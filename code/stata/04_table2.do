@@ -23,7 +23,7 @@ label variable model_y "Excess portfolio return; WML is not adjusted by RF again
 
 tempname postT2
 postfile `postT2' str8 portfolio byte decile ///
-    double mean_ret mean_t alpha alpha_t beta avg_cap long N ///
+    double mean_ret double mean_t double alpha double alpha_t double beta double avg_cap long N ///
     using "outputs/tables/JT_TableII.dta", replace
 
 forvalues d = 1/11 {
