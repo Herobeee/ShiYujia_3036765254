@@ -1,28 +1,30 @@
-# Processed analysis inputs (local only)
+# Processed Data — Not Included in This Repository
 
-These files are prepared locally from authorized source data and are intentionally ignored by Git. Do not commit licensed data to the public repository.
+The original raw datasets and the cleaned/processed datasets used for this project are **too large to upload to this GitHub repository**. GitHub also imposes file-size limits, so these data files are intentionally kept on the researcher's local machine rather than committed here.
 
-## Monthly stock panel
+This folder therefore contains documentation only; the absence of the `.dta` files is intentional and does not mean the data-processing step was omitted.
 
-Required local path: `crsp_monthly_clean_base.dta`
+## Files expected locally
 
-Required variables:
-- `PERMNO`: numeric security identifier.
-- `month`: Stata monthly date (%tm recommended).
-- `MthRet`: monthly stock return in decimal units.
-- `MthCap`: monthly capitalization.
-- `SecuritySubType`: security subtype; the current analysis uses `COM`.
+For the primary Stata 18 daily Scholes–Williams workflow, place the following authorized files in this folder on your local machine:
 
-The corresponding raw source is `../raw/monthly_stock.csv`, reported to cover January 2000–December 2025. Convert `YYYYMM` into a Stata monthly `month` key. Before using the processed file, verify sample coverage, missing keys, return units, common-stock filtering, and uniqueness of `PERMNO month`. Do not silently drop duplicate key rows without inspecting the source rows and any available security/share-type fields.
+- `crsp_monthly_clean_base.dta`
+- `crsp_daily_common_base_2000_2025.dta`
 
-## Daily stock panel
+The Fama–French monthly factor file is expected at `data/raw/F-F_Research_Data_Factors.CSV`.
 
-Required local path: `crsp_daily_common_base_2000_2025.dta`
+These files are required to run the analysis, but they are not included in the public repository because of their size and, where applicable, data-licensing restrictions. Obtain the source data through the authorized provider/course access and reproduce the cleaning steps locally. Do not upload the original or cleaned CRSP/course data to this public repository unless redistribution is explicitly permitted.
 
-Required variables: `PERMNO date DlyRet DlyPrevCap`. `date` is a Stata daily date and returns are expected in decimal units. This input supports the daily Scholes–Williams beta workflow for Table III.
+## How to run
 
-## Outputs and privacy
+Once the required local files are in place, open Stata 18 from the repository root and run:
 
-The existing master script consumes these processed datasets; it does not import `monthly_stock.csv` directly. Keep the existing Stata analysis authoritative and do not claim a raw-to-results run is complete until the local processed inputs have been prepared and validated in Stata 18.
+```stata
+do "code/stata/00_master.do"
+```
 
-Non-restricted summary tables may be placed under `outputs/tables/` only after checking applicable data-sharing rules. Never commit restricted raw or processed datasets.
+See [the input/output contract](../../skills/references/input-output-contract.md) for the expected variables, date formats, units, and generated outputs.
+
+## Reproducibility note
+
+The repository provides analysis code and documentation, not the large source datasets. A successful reproduction requires access to the appropriate data locally. The data's omission is a storage/licensing constraint, not a claim that the data are unnecessary.
