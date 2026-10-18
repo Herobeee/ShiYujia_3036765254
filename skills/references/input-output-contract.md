@@ -1,36 +1,37 @@
 # Input and Output Contract
 
-This document is the schema reference for the reusable skill in `skills/SKILL.md`.
+## Local inputs
 
-## Local inputs for the primary Stata workflow
-
-| Path | Role | Expected fields used by the committed scripts |
+| Path | Role | Expected fields |
 |---|---|---|
-| `data/processed/crsp_monthly_clean_base.dta` | Monthly stock returns and market capitalization for portfolio formation/holding returns | `PERMNO`, `month`, `MthRet`, `MthCap`, `SecuritySubType` |
-| `data/processed/crsp_daily_common_base_2000_2025.dta` | Daily stock returns and lagged market capitalization for the market proxy and Scholes–Williams beta | `PERMNO`, `date`, `DlyRet`, `DlyPrevCap` |
-| `data/raw/F-F_Research_Data_Factors.CSV` | Monthly Fama–French market excess return and risk-free rate | CSV header must expose `Mkt_RF` and `RF`; the current import expects variable names on row 3 |
+| `data/processed/crsp_monthly_clean_base.dta` | Stock-level monthly formation/holding returns and capitalization | `PERMNO`, `month`, `MthRet`, `MthCap`, `SecuritySubType` |
+| `data/processed/crsp_daily_common_base_2000_2025.dta` | Daily stock returns and lagged capitalization for market proxy and Scholes–Williams beta | `PERMNO`, `date`, `DlyRet`, `DlyPrevCap` |
+| `data/raw/F-F_Research_Data_Factors.CSV` | Official monthly factor CSV, header row 3 | First column YYYYMM, market-excess and risk-free columns |
+| `data/raw/F-F factors and RF.csv` | Cleaned monthly factor CSV, header row 1 | First column YYYYMM, `mktrf` or `mkt_rf`, and `rf` |
 
-The Stata code assumes Stata monthly dates for `month` and daily dates for `date`. Factor values in the French CSV are treated as percentage points and divided by 100 in `01_prepare_monthly_factors.do`. Stock returns are assumed to be decimal returns. Verify these conventions against the official source documentation before running.
+Factor values are assumed to be percentage points and divided by 100. Stock returns are assumed to be decimals. Verify these conventions before running.
+
+`SPY_GLD_monthly_prices.csv` is an ETF price file, not the stock-level monthly panel required to form momentum deciles. It is not a substitute for `crsp_monthly_clean_base.dta`.
 
 ## Generated files
 
 | Path | Contents |
 |---|---|
-| `outputs/tables/JT_TableIII_PanelA_daily_beta.csv` | Portfolio raw-return means, t-statistics, and observation counts by sample and decile, including P10−P1 |
-| `outputs/tables/JT_TableIII_PanelB_daily_beta.csv` | Market-model alpha estimates, t-statistics, and observation counts by sample and decile, including P10−P1 |
-| `outputs/figures/table3_panelA_raw_returns.png` | Figure of Panel A raw-return estimates with approximate 95% intervals inferred from the reported t-statistics |
-| `outputs/figures/table3_panelB_alphas.png` | Figure of Panel B alpha estimates with approximate 95% intervals inferred from the reported t-statistics |
-| `outputs/logs/JT_daily_beta_workflow.log` | Stata run log |
+| `outputs/tables/JT_TableI.csv` | Mean monthly returns, Newey–West t-statistics and N for P1–P10/WML across all 16 J/K combinations |
+| `outputs/tables/JT_TableII.csv` | J=K=6 mean returns, HAC t-statistics, market-model alpha/beta and average formation capitalization |
+| `outputs/tables/JT_TableIII_PanelA_daily_beta.csv` | Table III-style raw returns and WML by sample/group |
+| `outputs/tables/JT_TableIII_PanelB_daily_beta.csv` | Table III-style market-model alpha estimates |
+| `outputs/logs/JT_full_workflow.log` | Full master workflow log |
+| `data/processed/intermediate/jt_table1_portfolio_series.dta` | Local monthly series for J/K strategies, deciles, returns and formation capitalization |
+| `data/processed/intermediate/jt_factors_monthly.dta` | Normalized monthly Mkt-RF/RF series |
 
-The figure script visualizes already-exported estimates. It does not recalculate portfolio returns, standard errors, or regressions. Confidence intervals derived from t-statistics are visual approximations; the CSV tables remain the primary numerical record.
+## Method and interpretation notes
+
+- Table I uses equal-weighted deciles, overlapping formation cohorts and Newey–West lag K−1 for K-month holding strategies.
+- Table II market-model estimates use monthly Mkt-RF as the market-excess-return proxy. WML is a long-short return spread, so RF is not subtracted a second time.
+- Table III uses daily Scholes–Williams beta estimated on prior-calendar-year daily observations. Its daily market return is a lagged-capitalization-weighted proxy, not guaranteed to equal the original CRSP value-weighted index.
+- The modern sample is not the original 1965–1989 sample; describe it as a modern-sample methodological replication, not exact numerical reproduction.
 
 ## Data governance
 
-- Do not commit CRSP extracts, course data archives, or restricted processed datasets to the public repository.
-- Keep raw and processed inputs local unless the applicable licence explicitly permits redistribution.
-- Before committing outputs or logs, check whether they reveal restricted records, identifiers, local file paths, or other information that should remain private.
-- Public documentation should explain the authorized data-access route and expected local file names without redistributing the data themselves.
-
-## Scope boundary
-
-The currently connected Stata master workflow generates Table III-style outputs. It does not currently run Tables I and II. Do not imply that those tables are automatically reproduced unless their final analysis scripts are added and tested.
+Do not commit CRSP extracts, course data archives, or restricted processed datasets. Before sharing outputs or logs, check redistribution permission and remove sensitive local paths or restricted records.
