@@ -49,6 +49,18 @@ forvalues ell = 1/6 {
 }
 replace formret6 = . if nlag6 != 6
 
+* Project-specific robustness treatment: winsorize six-month formation returns
+* cross-sectionally within formation month at the 1st/99th percentiles.
+* This is an added implementation choice, not a step attributed to JT (1993).
+levelsof month if !missing(formret6), local(wmonths)
+foreach mm of local wmonths {
+    quietly _pctile formret6 if month == `mm' & !missing(formret6), p(1 99)
+    local p1 = r(r1)
+    local p99 = r(r2)
+    replace formret6 = `p1' if month == `mm' & formret6 < `p1' & !missing(formret6)
+    replace formret6 = `p99' if month == `mm' & formret6 > `p99' & !missing(formret6)
+}
+
 gen int beta_year = year(dofm(month)) - 1
 merge m:1 PERMNO beta_year using ///
     "data/processed/intermediate/jt_sw_beta_by_stock_year.dta", ///
