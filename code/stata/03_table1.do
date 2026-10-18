@@ -155,7 +155,7 @@ save "data/processed/intermediate/jt_table1_portfolio_series.dta", replace
 
 tempname postT1
 postfile `postT1' byte J byte K str8 portfolio byte decile ///
-    double mean_ret t_stat long N ///
+    double mean_ret double t_stat long N ///
     using "outputs/tables/JT_TableI.dta", replace
 
 foreach J of local jlist {
