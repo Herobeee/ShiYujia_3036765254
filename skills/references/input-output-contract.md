@@ -1,5 +1,11 @@
 # Input and Output Contract
 
+## Source CSV and local inputs
+
+The user-supplied stock-level source is `data/raw/monthly_stock.csv`, reported to cover 2000m1–2025m12. Its columns include `PERMNO`, `YYYYMM`, `MthRet`, `MthCap`, and `SecuritySubType`, as well as CRSP market-return fields. The CSV is a local source file, not a committed repository asset. `YYYYMM` is the month key from which Stata monthly `month` can be derived.
+
+The existing Stata master workflow does not directly import this raw CSV; it requires the processed monthly `.dta` contract below. Do not treat the raw CSV as connected to the workflow until a local prepared file has been checked for units, missing keys, and duplicate `PERMNO month` rows.
+
 ## Local inputs
 
 | Path | Role | Expected fields |
