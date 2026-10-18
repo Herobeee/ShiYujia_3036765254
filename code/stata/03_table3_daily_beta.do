@@ -6,21 +6,52 @@ Outputs are unverified until run locally in Stata with licensed data.
 **********************************************************************/
 version 18.0
 
-* 1. Formation-month characteristics.
+* 1. Formation-month characteristics, using explicit calendar-month merges.
+* This avoids xtset and ensures that lag means the prior calendar month.
 use "data/processed/crsp_monthly_clean_base.dta", clear
 keep if inrange(month, ym(2000,1), ym(2025,12))
 keep if SecuritySubType == "COM"
+keep PERMNO month MthRet MthCap
 isid PERMNO month
 format month %tm
-xtset PERMNO month
+tempfile monthly_base monthly_work lagfile
+save `monthly_base', replace
+save `monthly_work', replace
 
-gen double formation_cap = L.MthCap
-gen double formret6 = 1
 forvalues ell = 1/6 {
-    replace formret6 = formret6 * L`ell'.MthRet
+    use `monthly_base', clear
+    keep PERMNO month MthRet
+    replace month = month + `ell'
+    rename MthRet lagret`ell'
+    isid PERMNO month
+    save `lagfile', replace
+
+    use `monthly_work', clear
+    merge 1:1 PERMNO month using `lagfile', keep(master match) nogen
+    save `monthly_work', replace
 }
-replace formret6 = . if missing(L1.MthRet, L2.MthRet, L3.MthRet, ///
-    L4.MthRet, L5.MthRet, L6.MthRet)
+
+use `monthly_work', clear
+gen double formation_cap = lagret1
+* Replace formation_cap with prior-month MthCap, created separately below.
+drop formation_cap
+tempfile caplag
+use `monthly_base', clear
+keep PERMNO month MthCap
+replace month = month + 1
+rename MthCap formation_cap
+isid PERMNO month
+save `caplag', replace
+use `monthly_work', clear
+merge 1:1 PERMNO month using `caplag', keep(master match) nogen
+
+gen double formret6 = 1
+gen byte nlag6 = 0
+forvalues ell = 1/6 {
+    replace formret6 = formret6 * (1 + lagret`ell') if !missing(lagret`ell')
+    replace nlag6 = nlag6 + 1 if !missing(lagret`ell')
+}
+replace formret6 = . if nlag6 != 6
 
 gen int beta_year = year(dofm(month)) - 1
 merge m:1 PERMNO beta_year using ///
