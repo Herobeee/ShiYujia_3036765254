@@ -47,3 +47,20 @@ The scripts assume stock returns are decimals and factor values are percentage p
 - Do not commit restricted CRSP/course data or processed licensed datasets to the public repository.
 
 The scripts have not been run against the user's local licensed data in this environment. Inspect the log and verify merge keys, sample coverage, units, output row counts and table values before calling results final.
+## Standalone Table III Panel B (size portfolios only)
+
+`05_table3_panelB_size_capm.do` preserves the standalone size-group CAPM calculation for All, Small, Medium and Large portfolios. It estimates monthly excess portfolio returns on the market excess return using Newey–West standard errors with lag 5.
+
+Run from the repository root:
+
+```stata
+do "code/stata/05_table3_panelB_size_capm.do"
+```
+
+This script expects the following **local-only intermediate files** (they are not committed to GitHub):
+
+- `data/processed/intermediate/JT_TableII_returns_with_market.dta`: `holding_month`, `mkt_return`, `portret1`–`portret10`, `WML`.
+- `data/processed/intermediate/JT_TableIII_size_panelA_monthly.dta`: `holding_month`, `sizegrp` (1=Small, 2=Medium, 3=Large), portfolio return variables and `WML`.
+- `data/processed/intermediate/FF_monthly_factors.dta`: `holding_month`, `rf_decimal`.
+
+It writes `outputs/tables/JT_TableIII_PanelB_size_only.csv` and `.dta`. This is a **standalone size-only output** and is not called by `00_master.do`; the integrated size/beta Table III workflow remains `03_table3_daily_beta.do`. The script is organized for repository use, but its output has not been independently rerun or validated in this environment.
