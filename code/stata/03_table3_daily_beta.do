@@ -31,10 +31,6 @@ forvalues ell = 1/6 {
     save `monthly_work', replace
 }
 
-use `monthly_work', clear
-gen double formation_cap = lagret1
-* Replace formation_cap with prior-month MthCap, created separately below.
-drop formation_cap
 tempfile caplag
 use `monthly_base', clear
 keep PERMNO month MthCap
