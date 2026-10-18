@@ -157,10 +157,8 @@ foreach rv of local rankvars {
 
     * Add factor returns for CAPM alphas.
     use `series', clear
-    rename holding_month month
-    merge m:1 month using "data/processed/intermediate/jt_factors_monthly.dta", ///
+    merge m:1 holding_month using "data/processed/intermediate/jt_factors_monthly.dta", ///
         keep(match) nogen
-    rename month holding_month
     save `series', replace
 
     forvalues d = 1/10 {
