@@ -14,6 +14,12 @@ do "code/stata/00_master.do"
 4. `02_estimate_sw_beta.do` — builds a daily lagged-capitalization-weighted market proxy and estimates annual Scholes–Williams beta by PERMNO-year.
 5. `03_table3_daily_beta.do` — produces Table III-style size/beta groups; formation month in year Y uses beta from year Y−1.
 
+## Source data and required local inputs
+
+The monthly stock-level source is `data/raw/monthly_stock.csv`, reported to cover January 2000–December 2025. Its supplied columns include `PERMNO`, `YYYYMM`, `MthRet`, `MthCap`, and `SecuritySubType`. See [`data/raw/README.md`](../../data/raw/README.md) for details.
+
+The existing master script expects the processed `.dta` inputs below and does not import `monthly_stock.csv` directly. Keep the established analysis code unchanged and ensure the local processed file follows the documented contract before running.
+
 ## Required local inputs
 
 - `data/processed/crsp_monthly_clean_base.dta`: `PERMNO month MthRet MthCap SecuritySubType`
