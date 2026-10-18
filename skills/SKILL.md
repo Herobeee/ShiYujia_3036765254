@@ -48,7 +48,7 @@ Do not hand-edit paths for each run. Keep repository-relative paths stable. If a
 Only after the Stata run succeeds and its CSV outputs have been checked, install the optional Python dependencies if needed:
 
 ```bash
-python -m pip install -r requirements-python-legacy.txt
+python -m pip install -r skills/requirements.txt
 python skills/scripts/plot_table3.py
 ```
 
