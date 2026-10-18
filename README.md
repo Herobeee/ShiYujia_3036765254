@@ -1,62 +1,50 @@
 # Jegadeesh & Titman (1993): Momentum Replication
 
-**Project:** modern-sample momentum replication and size-heterogeneity extension.  
+**Project:** modern-sample methodological replication and size-heterogeneity extension.  
 **Paper:** Narasimhan Jegadeesh and Sheridan Titman (1993), “Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency,” *Journal of Finance*, 48(1), 65–91.
 
-## Primary workflow
+## Complete Stata workflow
 
-The primary Table III route is the **Stata 18 daily-data Scholes–Williams beta workflow** in `code/stata/`. The monthly rolling-beta/Python analysis is a retained legacy exploratory workflow, not the primary Table III method. Do not combine results from the two workflows unless their samples, portfolio definitions, and factor construction have been reconciled and documented.
-
-The daily market-return proxy is a lagged-capitalization-weighted return built from the supplied ordinary-stock sample. It is not guaranteed to be identical to the original CRSP value-weighted index. This is a modern-sample methodological replication, not an exact numerical reproduction of the original historical sample.
-
-## Run the Stata workflow
-
-Use Stata 18 from the repository root:
+Run from the repository root in Stata 18:
 
 ```stata
 do "code/stata/00_master.do"
 ```
 
-The master script runs:
+The master runs the following modules:
 
-1. `code/stata/01_prepare_monthly_factors.do`
-2. `code/stata/02_estimate_sw_beta.do`
-3. `code/stata/03_table3_daily_beta.do`
+1. `01_prepare_monthly_factors.do` — imports monthly Fama–French Mkt-RF and RF, normalizes names and converts percentage points to decimals.
+2. `03_table1.do` — constructs equal-weighted momentum deciles for J = 3, 6, 9, 12 and K = 3, 6, 9, 12-month overlapping holding strategies. Newey–West lags equal K−1.
+3. `04_table2.do` — summarizes the J=K=6 portfolios, including mean returns, HAC t-statistics, market-model alpha/beta and average formation capitalization.
+4. `02_estimate_sw_beta.do` — constructs a daily lagged-capitalization-weighted market proxy and estimates annual Scholes–Williams beta by stock.
+5. `03_table3_daily_beta.do` — produces Table III-style size/beta sorts using the prior calendar year's daily Scholes–Williams beta.
 
-Required local inputs:
+## Required local inputs
 
-- `data/processed/crsp_monthly_clean_base.dta`
-- `data/processed/crsp_daily_common_base_2000_2025.dta`
-- `data/raw/F-F_Research_Data_Factors.CSV`
+- `data/processed/crsp_monthly_clean_base.dta` — `PERMNO`, `month`, `MthRet`, `MthCap`, `SecuritySubType`
+- `data/processed/crsp_daily_common_base_2000_2025.dta` — `PERMNO`, `date`, `DlyRet`, `DlyPrevCap`
+- Either `data/raw/F-F_Research_Data_Factors.CSV` (official layout, header row 3) or `data/raw/F-F factors and RF.csv` (cleaned layout, header row 1), with a YYYYMM key plus Mkt-RF and RF columns.
 
-The exact input fields and output contract are documented in [skills/references/input-output-contract.md](skills/references/input-output-contract.md). **Do not upload restricted CRSP/course data, source archives, or processed licensed datasets to this public repository.**
+Stock returns are assumed to be decimals; factor CSV values are assumed to be percentage points and divided by 100. Verify source units before running.
 
-## Skill and optional Python tools
+**Important:** `SPY_GLD_monthly_prices.csv` contains SPY/GLD ETF prices, not stock-level monthly CRSP returns. It cannot by itself form the ten stock momentum deciles in Tables I and II. `daily_stock.csv` must be mapped and validated into the documented daily schema before it can be used by the Table III beta module.
 
-- [Reusable replication skill](skills/SKILL.md) explains the main workflow, expected outputs, and validation checks.
-- [Input/output contract](skills/references/input-output-contract.md) documents the expected data fields, units, and data governance.
-- `skills/scripts/plot_table3.py` creates figures from the CSVs exported by Stata. It does not estimate the model.
-- `requirements-python-legacy.txt` contains optional dependencies for the retained legacy Python workflow and plotting helper. The primary estimation workflow uses Stata 18 and does not require Python packages.
-
-After a successful Stata run, figures can be generated from the repository root:
-
-```bash
-python -m pip install -r skills/requirements.txt
-python skills/scripts/plot_table3.py
-```
+**Do not upload restricted CRSP/course data, source archives, or processed licensed datasets to this public repository.**
 
 ## Outputs
 
-The connected Stata master currently generates Table III-style outputs:
+- `outputs/tables/JT_TableI.csv` — Table I-style mean returns, Newey–West t-statistics and sample sizes for all J/K strategies and P1–P10/WML.
+- `outputs/tables/JT_TableII.csv` — J=K=6 portfolio summary and market-model estimates.
+- `outputs/tables/JT_TableIII_PanelA_daily_beta.csv` — Table III-style raw returns and WML by sample/group.
+- `outputs/tables/JT_TableIII_PanelB_daily_beta.csv` — Table III-style market-model alpha estimates.
+- `outputs/logs/JT_full_workflow.log` — master run log.
 
-- `outputs/tables/JT_TableIII_PanelA_daily_beta.csv`
-- `outputs/tables/JT_TableIII_PanelB_daily_beta.csv`
-- `outputs/logs/JT_daily_beta_workflow.log`
-
-The plotting helper writes two figures under `outputs/figures/`. Intermediate `.dta` files and logs should remain local unless their contents and the applicable licence permit redistribution.
-
-**Scope note:** the currently connected Stata master runs Table III. Do not claim Tables I and II are reproduced by this master unless their final scripts are connected and tested.
+Intermediate .dta files and logs should remain local unless their contents and applicable licence permit redistribution.
 
 ## Validation status
 
-The committed Stata scripts have not been executed against the user's local licensed data in this environment. Before describing outputs as final, run the workflow in Stata 18 and check factor-file headers and units, uniqueness of date/PERMNO-month keys, beta merge coverage and timing, market-proxy construction, sample dates, return units, missing months, observation counts, and differences from the assigned paper tables. The plotting script also requires successful, non-empty Table III CSV outputs.
+The connected scripts have not been executed against the user's local data in this environment. Treat them as integrated code, not validated final estimates, until they run successfully in Stata 18. Check factor headers and units, uniqueness of PERMNO/month and PERMNO/date keys, return units, merge coverage, sample dates, observation counts and output rows. The daily market proxy is a lagged-capitalization-weighted proxy, not guaranteed to equal the original CRSP value-weighted index. This is a modern-sample methodological replication, not exact numerical reproduction of the original historical sample.
+
+## Reference
+
+Jegadeesh, N., & Titman, S. (1993). Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency. *The Journal of Finance*, 48(1), 65–91. https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
