@@ -19,6 +19,12 @@ The master runs the following modules:
 4. `02_estimate_sw_beta.do` — constructs a daily lagged-capitalization-weighted market proxy and estimates annual Scholes–Williams beta by stock.
 5. `03_table3_daily_beta.do` — produces Table III-style size/beta sorts using the prior calendar year's daily Scholes–Williams beta.
 
+## Source data and required local inputs
+
+The stock-level monthly source supplied for this project is `data/raw/monthly_stock.csv` (reported coverage: January 2000–December 2025). Its columns include `PERMNO`, `YYYYMM`, `MthRet`, `MthCap`, and `SecuritySubType`, plus CRSP market-return fields. See [`data/raw/README.md`](data/raw/README.md) for the source-field notes and local-only data rules.
+
+**Workflow boundary:** the current Stata master still consumes the processed monthly `.dta` file listed below; it does not directly import `monthly_stock.csv`. Preserve the existing Stata analysis as the authoritative workflow; do not assume a raw-to-results run is available until that local processed input has been prepared and checked.
+
 ## Required local inputs
 
 - `data/processed/crsp_monthly_clean_base.dta` — `PERMNO`, `month`, `MthRet`, `MthCap`, `SecuritySubType`
