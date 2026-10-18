@@ -1,50 +1,85 @@
-# Reusable Skill: Momentum Table III-Style Replication
+---
+name: jt-momentum-replication
+description: Run and audit the repository's primary Stata 18 daily-data Scholes–Williams beta workflow for the Jegadeesh–Titman momentum replication, then create figures from its exported Table III results. Use when reproducing or checking this project; do not route to the legacy monthly Python analysis.
+---
 
-## Purpose
+# Reusable Skill: Jegadeesh–Titman Momentum Replication
 
-Generate a modern-sample market-model alpha table for P1–P10 and WML, summarize the inputs, create diagnostic figures, and test whether WML alphas differ across size groups.
+## Goal
 
-## Inputs
+Run the primary replication workflow from documented local inputs, produce the Table III-style outputs, create figures from those outputs, and record validation checks. This is an executable workflow guide, not a substitute for the project README.
 
-Place the following licensed/approved analysis files in data/processed/ locally:
-- JT_TableII_returns_with_market.dta
-- JT_TableIII_size_panelA_monthly.dta
-- FF_monthly_factors.dta
+## Primary route
 
-Never commit restricted course or CRSP datasets to a public repository. Read the data dictionary and course download instructions first.
+- Main analysis software: Stata 18.
+- Main Table III beta specification: daily Scholes–Williams beta.
+- A formation month in calendar year Y uses beta estimated from daily data in year Y−1.
+- The market return for the adjustment is a lagged-capitalization-weighted proxy built from the supplied ordinary-stock sample. It is not guaranteed to equal the original CRSP value-weighted index.
+- Do not use the legacy monthly Python analysis as the primary Table III result or mix its outputs with the Stata outputs.
 
-## Workflow
+## Required local inputs
 
-1. Install dependencies with python -m pip install -r requirements.txt.
-2. Run python code/run_all.py from the repository root (the script also resolves paths relative to itself).
-3. Confirm that month keys are Stata monthly integers and that the period is December 2001 through December 2025.
-4. Confirm that portfolio returns, market returns, and risk-free rates are decimals.
-5. Confirm one observation per month in the full-sample portfolio and factor files, and one observation per month and size group in the size file.
-6. Confirm that the market-return series is taken from the full-sample return input and the risk-free rate is merged by month.
-7. Review outputs/tables/core_replication_alphas.csv, size_heterogeneity_tests.csv, and summary_statistics.csv.
-8. Review the 95% HAC interval figures in outputs/figures/.
-9. Cross-check the results against independent Stata regressions before using them in the report.
+Place authorized data locally at these paths:
 
-## Statistical specifications
+1. `data/processed/crsp_monthly_clean_base.dta`
+2. `data/processed/crsp_daily_common_base_2000_2025.dta`
+3. `data/raw/F-F_Research_Data_Factors.CSV`
 
-For each P1–P10 portfolio, regress portfolio excess returns on market excess returns: R_p - RF = alpha + beta (R_m - RF) + error.
+See [the input/output contract](references/input-output-contract.md) for expected variables, units, and data-governance rules. Never commit restricted CRSP/course data or archives to this public repository.
 
-For WML, regress the winner-minus-loser spread on market excess return. Do not subtract RF from WML again. All regressions use OLS coefficients with Newey–West/HAC standard errors using five lags.
+## Run the workflow
 
-The independent extension estimates the intercept in the regression of the pairwise difference between two size-group WML return series on market excess return. This intercept is the difference in their market-model alphas under a common time index. Report the estimate and HAC t-statistic; do not state that two groups differ unless the formal test supports it.
+From the repository root, run in Stata 18:
 
-## Outputs
+```stata
+do "code/stata/00_master.do"
+```
 
-The Python entry point writes:
-- Core portfolio alphas and HAC inference.
-- Pairwise size-group WML alpha-difference tests.
-- Descriptive statistics.
-- Full-sample alpha confidence-interval figure.
-- WML alpha comparison figure.
+The master checks the input files and then runs:
 
-## Troubleshooting
+1. `code/stata/01_prepare_monthly_factors.do`
+2. `code/stata/02_estimate_sw_beta.do`
+3. `code/stata/03_table3_daily_beta.do`
 
-- Missing-input errors are intentional and identify the expected local path.
-- Merge errors indicate duplicate monthly keys or a mismatch between input formats; fix the input construction, not the results.
-- Missing RF or market returns must be resolved from approved source data and documented.
-- If the data use percentage points rather than decimals, convert units explicitly after verifying the source documentation. Do not infer units from the observed coefficient size alone.
+Do not hand-edit paths for each run. Keep repository-relative paths stable. If a source file has a different name or schema, document and validate one deliberate mapping before running.
+
+## Generate figures
+
+Only after the Stata run succeeds and its CSV outputs have been checked, install the optional Python dependencies if needed:
+
+```bash
+python -m pip install -r requirements-python-legacy.txt
+python skills/scripts/plot_table3.py
+```
+
+The plotting script reads the Stata-exported CSV files; it does not estimate betas, construct portfolios, or alter regression results. It writes figures to `outputs/figures/`.
+
+## Expected outputs
+
+Stata exports:
+
+- `outputs/tables/JT_TableIII_PanelA_daily_beta.csv` — raw portfolio returns and winner-minus-loser spread.
+- `outputs/tables/JT_TableIII_PanelB_daily_beta.csv` — CAPM-alpha estimates.
+- `outputs/tables/JT_TableIII_daily_beta_portfolio_returns.dta` — local audit series; do not commit unless redistribution is explicitly permitted.
+- `outputs/logs/JT_daily_beta_workflow.log` — run log; inspect and sanitize local paths before sharing.
+
+The figure script exports:
+
+- `outputs/figures/table3_panelA_raw_returns.png`
+- `outputs/figures/table3_panelB_alphas.png`
+
+The currently connected Stata master runs the Table III route. Do not claim that Tables I and II are generated by this master unless their final scripts are connected and tested.
+
+## Validation checklist
+
+Before treating results as final:
+
+- Confirm Stata completes successfully and inspect the log.
+- Confirm both output CSVs exist, are non-empty, and have expected sample/group labels and P1–P10 plus P10−P1 rows.
+- Check sample dates, observation counts, return units, factor units, and merge coverage.
+- Verify the prior-calendar-year beta timing and absence of same-year look-ahead.
+- Review market-proxy construction and daily observation counts.
+- Inspect figures and cross-check plotted estimates against the CSV tables.
+- Compare modern-sample results with the assigned paper tables and document methodological/sample differences.
+
+Do not fabricate missing inputs, fill results by hand, or describe unrun code/results as validated. If an input or check fails, report the specific failure instead of silently changing the specification.
