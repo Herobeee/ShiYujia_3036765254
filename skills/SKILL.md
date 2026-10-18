@@ -25,6 +25,10 @@ The master runs:
 4. code/stata/02_estimate_sw_beta.do
 5. code/stata/03_table3_daily_beta.do
 
+## Source monthly CSV
+
+The supplied stock-level source is `data/raw/monthly_stock.csv` (reported coverage 2000m1–2025m12), with `PERMNO`, `YYYYMM`, `MthRet`, `MthCap`, and `SecuritySubType` among its columns. See `data/raw/README.md` and `data/processed/README.md` for local data handling and variable contracts. The existing Stata master consumes the processed `.dta` input; it does not import the raw CSV directly.
+
 ## Required local inputs
 
 - data/processed/crsp_monthly_clean_base.dta
