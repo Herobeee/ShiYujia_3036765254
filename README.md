@@ -24,7 +24,7 @@ The independent extension tests whether the WML market-model alpha differs acros
 - `outputs/figures/`: generated figures.
 - `skills/SKILL.md`: reusable workflow and validation checklist.
 - `AI_USE_DISCLOSURE.md`: AI-use and verification disclosure.
-- `report.pdf`: final empirical report; create/update only after running the workflow against the final approved inputs and reviewing the generated extension tests.
+- `report.pdf`: preliminary report draft is included; it must be updated after running the workflow against the final approved inputs and reviewing the generated extension tests. The more editable source draft is `report_draft.md`.
 
 ## Required input files
 
