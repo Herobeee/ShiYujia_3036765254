@@ -27,7 +27,7 @@ Factor values are assumed to be percentage points and divided by 100. Stock retu
 
 ## Method and interpretation notes
 
-- Table I uses equal-weighted deciles, overlapping formation cohorts and Newey–West lag K−1 for K-month holding strategies.
+- Table I uses equal-weighted deciles, overlapping formation cohorts and Newey–West lag K−1 for K-month holding strategies. The project-specific J=6 formation return is winsorized by formation month at the 1st/99th percentiles; this is an added robustness treatment, not a procedure claimed from JT (1993).
 - Table II market-model estimates use monthly Mkt-RF as the market-excess-return proxy. WML is a long-short return spread, so RF is not subtracted a second time.
 - Table III uses daily Scholes–Williams beta estimated on prior-calendar-year daily observations. Its daily market return is a lagged-capitalization-weighted proxy, not guaranteed to equal the original CRSP value-weighted index.
 - The modern sample is not the original 1965–1989 sample; describe it as a modern-sample methodological replication, not exact numerical reproduction.
