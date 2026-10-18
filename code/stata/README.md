@@ -33,9 +33,3 @@ CRSP/course data may be restricted. Keep the data on your own machine; commit on
 - Overlapping formation cohorts are averaged within each holding month.
 - French factors are converted from percentage points to decimals.
 - Newey–West standard errors use five lags.
-
-## Before treating results as final
-
-Run in Stata 18 with the licensed input data and check factor import, merge coverage by formation year, portfolio observation counts, decimal return units, missing months, and comparison with the assigned paper table.
-
-These scripts are organized but have not been executed against the user's local data in this environment. Results remain unverified until the local run completes successfully.
